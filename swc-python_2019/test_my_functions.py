@@ -20,7 +20,6 @@ def test_dot_comparison():
     y = np.arange(5,10)
     my = mf.dot(x,y)
     py = np.dot(x,y)
-    
     npt.assert_almost_equal(my, py, decimal=15)
     
 def test_dot_result():
@@ -29,7 +28,6 @@ def test_dot_result():
     x = np.arange(5)
     y = np.arange(5,10)
     my = mf.dot(x,y)
-    
     npt.assert_almost_equal(my, result, decimal=15)
     
 def test_hadamard_var_size():
@@ -99,7 +97,7 @@ def test_outer2_result():
                        [20., 24., 28., 32., 36., 40., 44.]])
     x = np.arange(5)
     y = np.arange(5,12)
-    my = mf.outer1(x,y)
+    my = mf.outer2(x,y)
     npt.assert_almost_equal(my, result, decimal=15)
     
 def test_outer3_result():
@@ -111,16 +109,28 @@ def test_outer3_result():
                        [20., 24., 28., 32., 36., 40., 44.]])
     x = np.arange(5)
     y = np.arange(5,12)
-    my = mf.outer1(x,y)
+    my = mf.outer3(x,y)
     npt.assert_almost_equal(my, result, decimal=15)
     
-def test_outer3_comparison():
+def test_my_outer_Ipy_outer_comparison():
     '''Compares np.outer and our function'''
     x = np.arange(5)
     y = np.arange(5,12)
-    my = mf.outer1(x,y)
     py = np.outer(x,y)
-    npt.assert_almost_equal(my, py, decimal=15)
+    my1 = mf.outer1(x,y)
+    npt.assert_almost_equal(my1, py, decimal=15)
+    
+    my2 = mf.outer2(x,y)
+    npt.assert_almost_equal(my2, py, decimal=15)
+    
+    my3 = mf.outer3(x,y)
+    npt.assert_almost_equal(my3, py, decimal=15)
+    
+    npt.assert_almost_equal(my2, my1, decimal=15)
+    
+    npt.assert_almost_equal(my3, my1, decimal=15)
+    
+    npt.assert_almost_equal(my3, my2, decimal=15)
     
 def test_vec_norm_p_int():
     '''Checks if p value is integer'''
@@ -145,7 +155,7 @@ def test_vec_norm_first_inequality():
     y = np.linspace(2,8,5)
     left = mf.vec_norm(x+y, p) 
     right = mf.vec_norm(x, p) + mf.vec_norm(y, p)
-    npt.assert_array_less(left, right)#, 'Arrays left-side of inequality is not less than right-side of inequality')
+    npt.assert_(left <= right, 'Left-side term of inequality is not less than right-side term')
     
 def test_vec_norm_second_inequality():
     '''Checks second inequality'''
@@ -154,7 +164,7 @@ def test_vec_norm_second_inequality():
     alpha = -2
     left = mf.vec_norm(alpha*x, p) 
     right = np.abs(alpha)*mf.vec_norm(x, p)
-    npt.assert_array_less(left, right)#, 'Arrays left-side of inequality is not less than right-side of inequality')
+    npt.assert_(left <= right, 'Left-side term of inequality is not less than right-side term')
     
 def test_vec_norm_third_inequality():
     '''Checks third inequality'''
@@ -163,4 +173,31 @@ def test_vec_norm_third_inequality():
     y = np.linspace(2,8,5)
     left = np.abs(mf.dot(x,y))
     right = mf.vec_norm(x, p)*mf.vec_norm(y, p)
-    npt.assert_almost_equal(left, right)#, 'Arrays left-side of inequality is not less than right-side of inequality')
+    npt.assert_(left <= right, 'Left-side term of inequality is not less than right-side term')
+    
+def test_vec_norm_fourth_inequality():
+    '''Checks fourth inequality'''
+    p = [1,2]
+    x = np.arange(-2,3)
+    left = mf.vec_norm(x,p[1])
+    middle = mf.vec_norm(x,p[0])
+    right = np.sqrt(x.size)*mf.vec_norm(x,p[1])
+    npt.assert_(left <= middle <= right, 'Left-side term of inequality is not less than right-side term')
+    
+def test_vec_norm_fifth_inequality():
+    '''Checks fifth inequality'''
+    p = [0,2]
+    x = np.arange(-2,3)
+    left = mf.vec_norm(x,p[0])
+    middle = mf.vec_norm(x,p[1])
+    right = np.sqrt(x.size)*mf.vec_norm(x,p[0])
+    npt.assert_(left <= middle <= right, 'Left-side term of inequality is not less than right-side term')
+    
+def test_vec_norm_sixth_inequality():
+    '''Checks sixth inequality'''
+    p = [0,1]
+    x = np.arange(-2,3)
+    left = mf.vec_norm(x,p[0])
+    middle = mf.vec_norm(x,p[1])
+    right = x.size*mf.vec_norm(x,p[0])
+    npt.assert_(left <= middle <= right, 'Left-side term of inequality is not less than right-side term')

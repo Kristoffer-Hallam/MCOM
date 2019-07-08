@@ -82,7 +82,7 @@ def outer3(x,y):
     assert x.shape != y.shape, 'Arrays must have different shapes'
     M = np.empty((x.size,y.size))
     for j in range(y.size):
-        M[:,j] = y[j]*x
+        M[:,j] = x*y[j]
     return M
 
 def vec_norm(x, p):
