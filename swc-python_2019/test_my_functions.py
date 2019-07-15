@@ -4,15 +4,15 @@ from pytest import raises
 
 import my_functions as mf
 
-def test_dot_var_size():
-    '''Checks variable size compatibility'''
-    x = np.empty(5)
-    y = np.empty(4)
-    raises(AssertionError, mf.dot, x, y)
+# def test_dot_var_size():
+#     '''Checks variable size compatibility'''
+#     x = np.empty(5)
+#     y = np.empty(4)
+#     raises(AssertionError, mf.dot, x, y)
     
-    x = np.empty(4)
-    y = np.empty(5)
-    raises(AssertionError, mf.dot, x, y)
+#     x = np.empty(4)
+#     y = np.empty(5)
+#     raises(AssertionError, mf.dot, x, y)
     
 def test_dot_comparison():
     '''Compares my dot function with the numpy.dot'''
@@ -272,64 +272,102 @@ def test_mat_sma_ws_is_not_larger_than_three():
 def test_mat_sma_comparison():
     '''Compares both sma functions'''
     ws = 3
-#    x = np.random.randint(0., 0.1, size=18)
     x = np.random.random(30)
     filt = mf.mat_sma(x, 5)
     y = mf.sma1d(x, ws)
     npt.assert_almost_equal(y, filt, decimal=15)
+
+def test_matmat_prod1_true_calc():
+    '''Checks true and calcuted from matmat_prod1 function matrix'''
+    C_true = np.array([[ 7., 11., 12.], [10., 16., 16.], [17., 28., 24.]])
+    A = np.array([[1,3],[2,4],[5,6]])
+    B = np.array([[1,2,0],[2,3,4]])
+    npt.assert_almost_equal(C_true, mf.matmat_prod1(A, B), decimal=15)
+
+def test_matmat_prod1_dot_versus_matmat_prod1():
+    '''Checks true and calcuted from matmat_prod1 function matrix'''
+    A = np.array([[1,3],[2,4],[5,6]])
+    B = np.array([[1,2,0],[2,3,4]])
+    npt.assert_almost_equal(np.dot(A, B), mf.matmat_prod1(A, B), decimal=15)
+
+def test_matmat_prod2_true_calc():
+    '''Checks true and calcuted from matmat_prod1 function matrix'''
+    C_true = np.array([[ 7., 11., 12.], [10., 16., 16.], [17., 28., 24.]])
+    A = np.array([[1,3],[2,4],[5,6]])
+    B = np.array([[1,2,0],[2,3,4]])
+    npt.assert_almost_equal(C_true, mf.matmat_prod2(A, B), decimal=15)
+
+def test_matmat_prod2_dot_versus_matmat_prod1():
+    '''Checks true and calcuted from matmat_prod1 function matrix'''
+    A = np.array([[1,3],[2,4],[5,6]])
+    B = np.array([[1,2,0],[2,3,4]])
+    npt.assert_almost_equal(np.dot(A, B), mf.matmat_prod2(A, B), decimal=15)
+
+def test_matmat_prod3_true_calc():
+    '''Checks true and calcuted from matmat_prod1 function matrix'''
+    C_true = np.array([[ 7., 11., 12.], [10., 16., 16.], [17., 28., 24.]])
+    A = np.array([[1.,3.],[2.,4.],[5.,6.]])
+    B = np.array([[1.,2.,0.],[2.,3.,4.]])
+    npt.assert_almost_equal(C_true, mf.matmat_prod3(A, B), decimal=15)
+
+def test_matmat_prod3_dot_versus_matmat_prod3():
+    '''Checks true and calcuted from matmat_prod1 function matrix'''
+    A = np.array([[1,3],[2,4],[5,6]])
+    B = np.array([[1,2,0],[2,3,4]])
+    npt.assert_almost_equal(np.dot(A, B), mf.matmat_prod3(A, B), decimal=15)
+
+# def test_deriv1d():
+#     '''Compares the true cossine function with the
+#     one calculated from our function'''
+#     spacing = 2.*np.pi/1000.
+#     theta = np.arange(0., 2*np.pi, spacing)
+#     y = np.sin(theta)
+#     z_true = np.cos(theta)
+#     z_calc = mf.deriv1d(y, spacing)
+#     npt.assert_almost_equal(z_calc[1:-1], z_true[1:-1], decimal=5)
     
-def test_deriv1d():
-    '''Compares the true cossine function with the
-    one calculated from our function'''
-    spacing = 2.*np.pi/1000.
-    theta = np.arange(0., 2*np.pi, spacing)
-    y = np.sin(theta)
-    z_true = np.cos(theta)
-    z_calc = mf.deriv1d(y, spacing)
-    npt.assert_almost_equal(z_calc[1:-1], z_true[1:-1], decimal=5)
+# def test_R1():
+#     '''Checks if R1 is orthogonal'''
+#     theta = 90.
+#     R1 = mf.R1(theta)
+#     I = np.identity(3)
+#     npt.assert_almost_equal(np.dot(R1, R1.T), I, decimal=15)
     
-def test_R1():
-    '''Checks if R1 is orthogonal'''
-    theta = 90.
-    R1 = mf.R1(theta)
-    I = np.identity(3)
-    npt.assert_almost_equal(np.dot(R1, R1.T), I, decimal=15)
+#     npt.assert_almost_equal(np.dot(R1.T, R1), I, decimal=15)
     
-    npt.assert_almost_equal(np.dot(R1.T, R1), I, decimal=15)
+# def test_R2():
+#     '''Checks if R1 is orthogonal'''
+#     theta = 90.
+#     R2 = mf.R2(theta)
+#     I = np.identity(3)
+#     npt.assert_almost_equal(np.dot(R2, R2.T), I, decimal=15)
     
-def test_R2():
-    '''Checks if R1 is orthogonal'''
-    theta = 90.
-    R2 = mf.R2(theta)
-    I = np.identity(3)
-    npt.assert_almost_equal(np.dot(R2, R2.T), I, decimal=15)
+#     npt.assert_almost_equal(np.dot(R2.T, R2), I, decimal=15)
     
-    npt.assert_almost_equal(np.dot(R2.T, R2), I, decimal=15)
+# def test_R3():
+#     '''Checks if R1 is orthogonal'''
+#     theta = 90.
+#     R3 = mf.R2(theta)
+#     I = np.identity(3)
+#     npt.assert_almost_equal(np.dot(R3, R3.T), I, decimal=15)
     
-def test_R3():
-    '''Checks if R1 is orthogonal'''
-    theta = 90.
-    R3 = mf.R2(theta)
-    I = np.identity(3)
-    npt.assert_almost_equal(np.dot(R3, R3.T), I, decimal=15)
+#     npt.assert_almost_equal(np.dot(R3.T, R3), I, decimal=15)
     
-    npt.assert_almost_equal(np.dot(R3.T, R3), I, decimal=15)
+# def test_matvec_diag_prod_true_calc():
+#     '''Comparison between true and result from function'''
+#     true = np.array([-8., -4.,  0.,  4.,  8.])
+#     D = np.identity(5)*4.
+#     x = np.arange(-2,3)
+#     calc = mf.matvec_diag_prod(np.diag(D), x)
+#     npt.assert_almost_equal(calc, true, decimal=15)
     
-def test_matvec_diag_prod_true_calc():
-    '''Comparison between true and result from function'''
-    true = np.array([-8., -4.,  0.,  4.,  8.])
-    D = np.identity(5)*4.
-    x = np.arange(-2,3)
-    calc = mf.matvec_diag_prod(np.diag(D), x)
-    npt.assert_almost_equal(calc, true, decimal=15)
-    
-def test_matvec_diag_prod_comparison_functions():
-    '''Comparison between true and result from function'''
-    d = np.random.rand(5)
-    D = np.diag(d)
-    x = np.arange(-2,3)
-    diag_prod = mf.matvec_diag_prod(np.diag(D), x)
-    matvec = mf.matvec_prod1(D, x)
-    print 'diag_prod =', diag_prod
-    print 'matvec =', matvec
-    npt.assert_almost_equal(matvec, diag_prod, decimal=15)
+# def test_matvec_diag_prod_comparison_functions():
+#     '''Comparison between true and result from function'''
+#     d = np.random.rand(5)
+#     D = np.diag(d)
+#     x = np.arange(-2,3)
+#     diag_prod = mf.matvec_diag_prod(np.diag(D), x)
+#     matvec = mf.matvec_prod1(D, x)
+#     print 'diag_prod =', diag_prod
+#     print 'matvec =', matvec
+#     npt.assert_almost_equal(matvec, diag_prod, decimal=15)

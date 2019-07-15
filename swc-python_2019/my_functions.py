@@ -48,7 +48,7 @@ def dot(x,y):
     output >
     dot_product: scalar function
     '''
-    assert x.size == y.size, 'Arrays must have the same size'
+    #assert x.size == y.size, 'Arrays must have the same size'
     c = 0
     for i in range(x.size):
         c = c + x[i]*y[i]
@@ -216,10 +216,6 @@ def mat_sma(data, ws):
     A = np.array(np.hstack(((1./ws)*np.ones(ws), np.zeros(data.size - ws + 1))))
     A = np.resize(A, (data.size-2*i0, data.size))
     A = np.vstack((np.zeros(data.size), A, np.zeros(data.size)))
-#    k = 0
-#    for i in range(1, A.shape[0]-1):
-#        A[i,k:k+window_size] = 1./window_size
-#        k += 1
     filtered = matvec_prod1(A, data)
     return filtered
 
@@ -290,12 +286,9 @@ def matmat_prod3(A, B):
     C:          2D array - matrix
     '''
     assert A.shape[1] == B.shape[0], 'Number of columns of A is not the same as the lines of B'
-    C = np.zeros((B.shape[1], A.shape[0]))
-    print (B.T).shape, A[0,:].size
+    C = np.zeros((A.shape[0], B.shape[1]))
     for i in range(A.shape[0]):
-#        C[i,:] = dot(A[i,:], B)
-#         C[i,:] = matvec_prod1(B.T, A[i,:])
-         C[i,:] = matvec_prod2(B.T, A[i,:])
+        C[i,:] = dot(A[i,:],B)
     return C
 
 def R1(theta):
