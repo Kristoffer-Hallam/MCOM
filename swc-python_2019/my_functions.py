@@ -42,37 +42,57 @@ def dot(x,y):
     '''Calculates the dot product between two arrays
     
     input >
-    x:    1D array - first vector
-    y:    1D array - second vector
+    x:    1D or 2D array - first vector or matrix
+    y:    1D or 2D array - second vector or matrix
     
     output >
     dot_product: scalar function
     '''
-    #assert x.size == y.size, 'Arrays must have the same size'
     c = 0
-    for i in range(x.size):
-        c = c + x[i]*y[i]
+    if x.ndim == 1 and y.ndim == 1:
+        assert x.size == y.size, '1D arrays must have the same size'
+        for i in range(x.size):
+            c += x[i]*y[i]
+    elif x.ndim == 1 and y.ndim == 2:
+        assert x.size == y.shape[0], 'Columns of array x must have the same \
+                                            size as the rows of array y.'
+        for i in range(y.shape[0]):
+            c += x[i]*y[i]
+    elif x.ndim == 2 and y.ndim == 1:
+        assert x.shape[1] == y.size, 'Columns of array x must have the same \
+                                            size as the rows of array y.'
+        for i in range(x.shape[1]):
+            c += x[i]*y[i]
+    else:
+        assert x.shape[1] == y.shape[0], 'Columns of array x must have the same \
+                                            size as the rows of array y.'
+        for i in range(y.shape[0]):
+            c += x[i]*y[i]
     return c
 
 def hadamard(x,y):
     '''Calculates the Hadamard product between two arrays
     
     input >
-    x:    1D array - first vector
-    y:    1D array - second vector
+    x:    1D or 2D array - first vector or matrix
+    y:    1D or 2D array - second vector or matrix
     
     output >
     hadamard_product: scalar function
     '''
-    assert x.size == y.size, 'Arrays must have the same size'
-    assert x.shape == y.shape, 'Arrays must have the same shape'
     z = np.empty_like(x)
-    for i in range(x.size):
-        z[i] = x[i]*y[i]
+    if x.ndim == 1 and y.ndim == 1:
+        assert x.size == y.size, '1D arrays must have the same size'
+        for i in range(x.size):
+            z[i] = x[i]*y[i]
+    else:
+        assert x.shape == y.shape, '2D arrays must have the same shape.'
+        for i in range(x.size):
+            z[i] = x[i]*y[i]
     return z
 
 def outer1(x,y):
-    '''Calculates the outer product between two arrays
+    '''Calculates the outer product between two vectors
     
     input >
     x:    1D array - first vector
@@ -81,8 +101,8 @@ def outer1(x,y):
     output >
     outer_product: scalar function
     '''
-    assert x.size != y.size, 'Arrays must have different sizes'
-    assert x.shape != y.shape, 'Arrays must have different shapes'
+    # assert x.size != y.size, 'Arrays must have different sizes'
+    # assert x.shape != y.shape, 'Arrays must have different shapes'
     M = np.empty((x.size,y.size))
     for i in range(x.size):
         for j in range(y.size):
@@ -135,12 +155,17 @@ def vec_norm(x, p):
     '''
     assert type(p) == int, 'p value is not an integer'
     assert 0 <= p <= 2, 'p value must be in the inteval [0,2]'
+    norm = 0.
     if p == 0:
-        norm = np.max(x)
+        norm = np.max(np.abs(x))
     elif p == 1:
-        norm = np.sum(np.abs(x))
+        for i in range(len(x)):
+            norm += np.abs(x[i])
     else:
-        norm = np.sqrt(dot(x,x))
+        for i in range(len(x)):
+            norm += x[i]*x[i]
+        # or norm = dot(x,x)**0.5
+        norm = norm**0.5
     return norm
 
 def matvec_prod1(A, x):
@@ -172,10 +197,8 @@ def matvec_prod2(A, x):
     '''
     assert A.shape[1] == x.size, 'Matrix columns do not match vector lines'
     y = np.zeros_like(x)
-    print 'i', 'A', 'x'
     for i in range(A.shape[0]):
-        print i, A[i,:], x
-        y[i] = np.dot(A[i,:], x)
+        y[i] = dot(A[i,:], x)
     return y
     
 def matvec_prod3(A, x):
@@ -289,6 +312,39 @@ def matmat_prod3(A, B):
     C = np.zeros((A.shape[0], B.shape[1]))
     for i in range(A.shape[0]):
         C[i,:] = dot(A[i,:],B)
+        # C[i,:] = matvec_prod2(B.T, A[i,:])
+    return C
+
+def matmat_prod4(A, B):
+    '''Calculates a new matrix from the product of A and B
+    also known as 'Matrix-vector product formulation (colunm update)'
+    input >
+    A:          2D array - matrix
+    B:          2D array - matrix
+    
+    output >
+    C:          2D array - matrix
+    '''
+    assert A.shape[1] == B.shape[0], 'Number of columns of A is not the same as the lines of B'
+    C = np.zeros((A.shape[0], B.shape[1]))
+    for j in range(B.shape[1]):
+        C[:,j] = dot(B[:,j], A.T)
+    return C
+
+def matmat_prod5(A, B):
+    '''Calculates a new matrix from the product of A and B
+    also known as 'Outer product formulation'
+    input >
+    A:          2D array - matrix
+    B:          2D array - matrix
+    
+    output >
+    C:          2D array - matrix
+    '''
+    assert A.shape[1] == B.shape[0], 'Number of columns of A is not the same as the lines of B'
+    C = np.zeros((A.shape[0], B.shape[1]))
+    for k in range(A.shape[1]):
+        C += outer1(A[:,k],B[k,:])
     return C
 
 def R1(theta):
@@ -351,3 +407,169 @@ def matvec_diag_prod(d, x):
     assert d.size == x.size, 'Sizes of vectors mismatch'
     prod = hadamard(d,x)
     return prod
+
+def matmat_diagfull_prod(d, B):
+    '''Makes the diagonal matrix-vector product through Hadamard product
+    
+    input >
+    d:         1D array - vector extracted from the diagonal of a matrix
+    B:         2D array - matrix
+    
+    output >
+    prod:      1D array - Hadamard product
+    '''
+    C = np.zeros_like(B)
+    assert d.size == B.shape[0], 'Incompatibility between lines of matrix\
+                                    and size of diagonal vector'
+    for i in range(d.size):
+        C[i,:] = d[i]*B[i,:]
+    return C
+
+def matmat_fulldiag_prod(B, d):
+    '''Makes the diagonal matrix-vector product through Hadamard product
+    
+    input >
+    B:         2D array - matrix
+    d:         1D array - vector extracted from the diagonal of a matrix
+    
+    output >
+    prod:      1D array - Hadamard product
+    '''
+    E = np.zeros_like(B)
+    assert d.size == B.shape[0], 'Incompatibility between lines of matrix\
+                                    and size of diagonal vector'
+    for j in range(d.size):
+        E[:,j] = d[j]*B[:,j]
+    return E
+
+def matvec_diagk_prod(d, k, x):
+    '''Makes the dislocated diagonal matrix-vector product through Hadamard product
+    
+    input >
+    d:         1D array - vector extracted from the diagonal of a matrix
+    k:         int      - defines direction of diagonal change
+    x:         1D array - vector
+    
+    output >
+    prod:      1D array - Hadamard product
+    '''
+    assert type(k) == int, 'Factor k is not integer'
+    assert -x.size < np.abs(k) < x.size, 'Factor k must reside in interval [{limin},{limax}]'.format(limin=-x.size, limax=x.size)
+    assert d.size == x.size - np.abs(k), 'Factor k decides the size of d according\
+                                            to the size of x'
+    z = np.zeros(x.size)
+    if k < 0:
+        z[np.abs(k):] = hadamard(d, x[:k])
+    elif k == 0:
+        z = hadamard(d, x)
+    else:
+        z[:d.size] = hadamard(d, x[k:])
+    return z
+
+def matvec_triu_prod3(U, x):
+    '''Product between upper triangular matrix and a vector
+    (Algorithm 3)
+    
+    input >
+    U:         2D array - upper triangular matrix
+    d:         1D array - vector
+    
+    output >
+    prod:      1D array - vector
+    '''
+    assert U.shape[1] == x.size, 'Columns of matrix incompatible with size of vector'
+    y = np.zeros_like(x)
+    for i in range(x.size):
+        y[i] = dot(U[i,i:], x[i:])
+    return y
+
+def matvec_triu_prod5(U, x):
+    '''Product between upper triangular matrix and a vector
+    (Algorithm 5)
+
+    input >
+    U:         2D array - upper triangular matrix
+    d:         1D array - vector
+    
+    output >
+    prod:      1D array - vector
+    '''
+    assert U.shape[1] == x.size, 'Columns of matrix incompatible with size of vector'
+    y = np.zeros_like(x)
+    for j in range(x.size):
+        y[:j+1] += U[:j+1,j]*x[j]
+    return y
+
+def matvec_tril_prod8(L, x):
+    '''Product between upper triangular matrix and a vector
+    (Algorithm 8)
+
+    input >
+    L:         2D array - lower triangular matrix
+    d:         1D array - vector
+    
+    output >
+    prod:      1D array - vector
+    '''
+    assert L.shape[1] == x.size, 'Columns of matrix incompatible with size of vector'
+    z = np.zeros_like(x)
+    for i in range(x.size):
+        z[i] = dot(L[i,:i+1],x[:i+1])
+    return z
+
+def matvec_tril_prod10(L, x):
+    '''Product between upper triangular matrix and a vector
+    (Algorithm 10)
+
+    input >
+    L:         2D array - lower triangular matrix
+    d:         1D array - vector
+    
+    output >
+    prod:      1D array - vector
+    '''
+    assert L.shape[1] == x.size, 'Columns of matrix incompatible with size of vector'
+    z = np.zeros_like(x)
+    for j in range(x.size):
+        z[j:] += L[j:,j]*x[j]
+    return z
+
+def matvec_triu_opt_prod(u, x):
+    '''Product between non-null element vector extracted from
+    upper triangle matrix and a vector
+
+    input >
+    u:         1D array - non-null element vector extracted from
+                            upper triangle matrix
+    d:         1D array - vector
+    
+    output >
+    prod:      1D array - vector
+    '''
+    assert u.size == (x.size*(x.size+1))/2, 'Number of elements is not equal to {size}'.format(size=(x.size*(x.size+1))/2)
+    y = np.zeros(x.size)
+    k = 0
+    for i in range(x.size):
+        y[:x.size-i] += u[i+k:x.size+k]*x[i:]
+        k = x.size-(i+1)
+    return y
+
+def matvec_tril_opt_prod(l, x):
+    '''Product between non-null element vector extracted from
+    lower triangle matrix and a vector
+
+    input >
+    l:         1D array - non-null element vector extracted from
+                            lower triangle matrix
+    d:         1D array - vector
+    
+    output >
+    prod:      1D array - vector
+    '''
+    assert l.size == (x.size*(x.size+1))/2, 'Number of elements is not equal to {size}'.format(size=(x.size*(x.size+1))/2)
+    y = np.zeros(x.size)
+    k = 0
+    for i in range(x.size):
+        y[x.size-i-1:] += l[k:i+k+1]*x[:i+1]
+        k += i+1
+    return y
