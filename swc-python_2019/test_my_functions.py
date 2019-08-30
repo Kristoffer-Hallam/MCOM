@@ -66,11 +66,11 @@ def test_hadamard_result():
     
     npt.assert_almost_equal(my, result, decimal=15)
     
-# def test_outer1_var_size():
-#     '''Checks variable size incompatibility'''
-#     x = np.empty(4)
-#     y = np.empty(4)
-#     raises(AssertionError, mf.outer1, x, y)
+def test_outer1_var_size():
+    '''Checks variable size incompatibility'''
+    x = np.empty(4)
+    y = np.empty(4)
+    raises(AssertionError, mf.outer1, x, y)
     
 def test_outer2_var_size():
     '''Checks variable size incompatibility'''
@@ -601,3 +601,27 @@ def test_matvec_tril_opt_prod_comparing_functions():
     l = np.delete(l, ind)
     npt.assert_almost_equal(mf.matvec_tril_opt_prod(l, x), \
                             mf.matvec_tril_prod8(L, x), decimal=15)
+
+def test_matvec_symm_opt_prod_true_calc():
+    '''Compares the true value with the calculated from the function'''
+    x = np.array([1.,2.,1.,4.,6.])
+    S = np.triu(np.array([[5.,4.,3.,2.,1.],[4.,5.,4.,3.,2.],\
+        [3.,4.,5.,4.,3.],[2.,3.,4.,5.,4.],[1.,2.,3.,4.,5.]]))
+    s = np.reshape(S,(S.shape[0]*S.shape[1]))
+    ind = np.where(s==0)[0]
+    s = np.sort(np.delete(s, ind))[s.size::-1]
+
+    true = np.array([30., 42., 50., 56., 54.])
+    npt.assert_almost_equal(mf.matvec_symm_opt_prod(s,x),true,decimal=15)
+
+def test_matvec_symm_opt_prod_comparing_functions():
+    '''Compares results from different implemented functions'''
+    x = np.array([1.,2.,1.,4.,6.])
+    S = np.array([[5.,4.,3.,2.,1.],[4.,5.,4.,3.,2.],\
+        [3.,4.,5.,4.,3.],[2.,3.,4.,5.,4.],[1.,2.,3.,4.,5.]])
+    Sup = np.triu(S)
+    s = np.reshape(Sup,(Sup.shape[0]*Sup.shape[1]))
+    ind = np.where(s==0)[0]
+    s = np.sort(np.delete(s, ind))[s.size::-1]
+
+    npt.assert_almost_equal(mf.matvec_symm_opt_prod(s,x), mf.matvec_prod1(S, x),decimal=15)
