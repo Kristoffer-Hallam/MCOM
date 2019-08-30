@@ -101,8 +101,8 @@ def outer1(x,y):
     output >
     outer_product: scalar function
     '''
-    # assert x.size != y.size, 'Arrays must have different sizes'
-    # assert x.shape != y.shape, 'Arrays must have different shapes'
+    assert x.size != y.size, 'Arrays must have different sizes'
+    assert x.shape != y.shape, 'Arrays must have different shapes'
     M = np.empty((x.size,y.size))
     for i in range(x.size):
         for j in range(y.size):
@@ -311,8 +311,8 @@ def matmat_prod3(A, B):
     assert A.shape[1] == B.shape[0], 'Number of columns of A is not the same as the lines of B'
     C = np.zeros((A.shape[0], B.shape[1]))
     for i in range(A.shape[0]):
-        C[i,:] = dot(A[i,:],B)
-        # C[i,:] = matvec_prod2(B.T, A[i,:])
+        # C[i,:] = dot(A[i,:],B)
+        C[i,:] = matvec_prod2(B.T, A[i,:])
     return C
 
 def matmat_prod4(A, B):
@@ -564,7 +564,7 @@ def matvec_tril_opt_prod(l, x):
     d:         1D array - vector
     
     output >
-    prod:      1D array - vector
+    y:      1D array - vector
     '''
     assert l.size == (x.size*(x.size+1))/2, 'Number of elements is not equal to {size}'.format(size=(x.size*(x.size+1))/2)
     y = np.zeros(x.size)
@@ -572,4 +572,47 @@ def matvec_tril_opt_prod(l, x):
     for i in range(x.size):
         y[x.size-i-1:] += l[k:i+k+1]*x[:i+1]
         k += i+1
+    return y
+
+def matvec_symm_opt_prod(s, x):
+    '''Product between vector whose elements are same as the elements
+    of the diagonals of half a matrix and a generic vector
+
+    input >
+    s:         1D array - vector whose elements are same as the elements 
+                            of the diagonals of half a matrix
+    d:         1D array - vector
+    
+    output >
+    y:      1D array - vector
+    '''
+    y = hadamard(s[:x.size], x)
+    j1 = x.size
+    j2 = x.size+4
+    for i in range(1,x.size):
+        y += matvec_diagk_prod(s[j1:j2],i,x)
+        y += matvec_diagk_prod(s[j1:j2],-i,x)
+        j1 = j2
+        j2 = j2+x.size-(i+1)
+    return y
+
+def matvec_band_opt_prod(b, x):
+    '''Product between vector whose elements are same as the elements
+    of the diagonals of half a matrix and a generic vector
+
+    input >
+    b:         1D array - vector whose elements are parts of the
+                            different diagonals of a block matrix
+    x:         1D array - vector
+    
+    output >
+    y:      1D array - vector
+    '''
+
+    j2 = 0
+    y = np.zeros_like(x)
+    for i in range(-1,3):
+        j1 = j2
+        j2 += x.size-np.abs(i)
+        y += matvec_diagk_prod(b[j1:j2],i,x)
     return y

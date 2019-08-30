@@ -1,1 +1,4 @@
-{}
+{
+  "test_my_functions.py::test_matmat_prod5_dot_versus_matmat_prod3": true, 
+  "test_my_functions.py::test_matmat_prod5_true_calc": true
+}
