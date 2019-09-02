@@ -58,3 +58,6 @@ Related to Symmetric matrices - part2 ([`symmetric_matrices.ipynb`])
 * str7_band_mat.ipynb
 Related to Band matrices - part2 ([`band_matrices.ipynb`])
 
+# Numerical solution of linear systems
+
+* lin_sys1-triang_systems.ipynb ([`triangular_systems.ipynb`])
